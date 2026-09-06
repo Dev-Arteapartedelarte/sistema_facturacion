@@ -1,0 +1,198 @@
+<!-- reportes/templates/reportes/balance_general.html -->
+{% extends 'reportes/base_reporte.html' %}
+{% load humanize %}
+
+{% block titulo_reporte %}Balance General{% endblock %}
+
+{% block contenido_reporte %}
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Fecha de Corte</label>
+                <input type="date" name="fecha" class="form-control" value="{{ fecha_corte|date:'Y-m-d' }}">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-filter"></i> Actualizar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row">
+    <!-- ACTIVO -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-box"></i> ACTIVO</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Cuenta</th>
+                                <th class="text-end">Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cuenta in activos %}
+                            <tr>
+                                <td>{{ cuenta.codigo_cuenta }}</td>
+                                <td>{{ cuenta.nombre_cuenta }}</td>
+                                <td class="text-end">${{ cuenta.saldo|floatformat:0|intcomma }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">No hay cuentas de activo</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-success fw-bold">
+                                <td colspan="2">TOTAL ACTIVO</td>
+                                <td class="text-end">${{ total_activo|floatformat:0|intcomma }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PASIVO + PATRIMONIO -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-credit-card"></i> PASIVO</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Cuenta</th>
+                                <th class="text-end">Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cuenta in pasivos %}
+                            <tr>
+                                <td>{{ cuenta.codigo_cuenta }}</td>
+                                <td>{{ cuenta.nombre_cuenta }}</td>
+                                <td class="text-end">${{ cuenta.saldo|floatformat:0|intcomma }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">No hay cuentas de pasivo</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-danger fw-bold">
+                                <td colspan="2">TOTAL PASIVO</td>
+                                <td class="text-end">${{ total_pasivo|floatformat:0|intcomma }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0"><i class="bi bi-piggy-bank"></i> PATRIMONIO</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Código</th>
+                                <th>Cuenta</th>
+                                <th class="text-end">Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cuenta in patrimonio %}
+                            <tr>
+                                <td>{{ cuenta.codigo_cuenta }}</td>
+                                <td>{{ cuenta.nombre_cuenta }}</td>
+                                <td class="text-end">${{ cuenta.saldo|floatformat:0|intcomma }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">No hay cuentas de patrimonio</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-warning fw-bold">
+                                <td colspan="2">TOTAL PATRIMONIO</td>
+                                <td class="text-end">${{ total_patrimonio|floatformat:0|intcomma }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumen Pasivo + Patrimonio -->
+        <div class="card mt-3">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-calculator"></i> TOTAL PASIVO + PATRIMONIO</h5>
+            </div>
+            <div class="card-body text-center">
+                <h3>${{ total_pasivo|add:total_patrimonio|floatformat:0|intcomma }}</h3>
+                <small class="text-muted">
+                    Pasivo: ${{ total_pasivo|floatformat:0|intcomma }} + 
+                    Patrimonio: ${{ total_patrimonio|floatformat:0|intcomma }}
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Verificación del Balance -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-{% if balance_cuadrado %}success{% else %}danger{% endif %} text-white">
+                <h5 class="mb-0"><i class="bi bi-check-circle"></i> Verificación del Balance</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <h5>Activo</h5>
+                        <h3 class="text-success">${{ total_activo|floatformat:0|intcomma }}</h3>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Pasivo + Patrimonio</h5>
+                        <h3 class="text-primary">${{ total_pasivo|add:total_patrimonio|floatformat:0|intcomma }}</h3>
+                        <small class="text-muted">
+                            Pasivo: ${{ total_pasivo|floatformat:0|intcomma }}<br>
+                            Patrimonio: ${{ total_patrimonio|floatformat:0|intcomma }}
+                        </small>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Estado</h5>
+                        <h3>
+                            {% if balance_cuadrado %}
+                            <span class="text-success"><i class="bi bi-check-circle"></i> CUADRADO</span>
+                            {% else %}
+                            <span class="text-danger"><i class="bi bi-exclamation-triangle"></i> NO CUADRADO</span>
+                            <br>
+                            <small class="text-muted">Diferencia: ${{ total_activo|add:total_pasivo|add:total_patrimonio|floatformat:0|intcomma }}</small>
+                            {% endif %}
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

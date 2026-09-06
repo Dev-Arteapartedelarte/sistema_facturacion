@@ -1,0 +1,116 @@
+<!-- reportes/templates/reportes/estado_resultados.html -->
+{% extends 'reportes/base_reporte.html' %}
+{% load humanize %}
+
+{% block titulo_reporte %}Estado de Resultados{% endblock %}
+
+{% block contenido_reporte %}
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Año</label>
+                <select name="año" class="form-select">
+                    <option value="">Seleccionar</option>
+                    {% for a in años %}
+                    <option value="{{ a }}" {% if año_seleccionado == a|stringformat:"i" %}selected{% endif %}>
+                        {{ a }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Mes</label>
+                <select name="mes" class="form-select">
+                    <option value="">Todos</option>
+                    {% for m in meses %}
+                    <option value="{{ m }}" {% if mes_seleccionado == m|stringformat:"i" %}selected{% endif %}>
+                        {{ m }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-filter"></i> Filtrar
+                </button>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <a href="{% url 'estado_resultados' %}" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Resultados -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            Período: {{ fecha_desde|date:"d/m/Y" }} - {{ fecha_hasta|date:"d/m/Y" }}
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Cuenta</th>
+                        <th class="text-end">Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Ingresos -->
+                    <tr class="table-success">
+                        <th colspan="3">INGRESOS</th>
+                    </tr>
+                    {% for ingreso in ingresos %}
+                    <tr>
+                        <td>{{ ingreso.codigo_cuenta }}</td>
+                        <td>{{ ingreso.nombre_cuenta }}</td>
+                        <td class="text-end">${{ ingreso.monto|floatformat:0|intcomma }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">No hay ingresos en este período</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="table-success fw-bold">
+                        <td colspan="2">TOTAL INGRESOS</td>
+                        <td class="text-end">${{ total_ingresos|floatformat:0|intcomma }}</td>
+                    </tr>
+                    
+                    <!-- Gastos -->
+                    <tr class="table-danger">
+                        <th colspan="3">GASTOS</th>
+                    </tr>
+                    {% for gasto in gastos %}
+                    <tr>
+                        <td>{{ gasto.codigo_cuenta }}</td>
+                        <td>{{ gasto.nombre_cuenta }}</td>
+                        <td class="text-end">${{ gasto.monto|floatformat:0|intcomma }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">No hay gastos en este período</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="table-danger fw-bold">
+                        <td colspan="2">TOTAL GASTOS</td>
+                        <td class="text-end">${{ total_gastos|floatformat:0|intcomma }}</td>
+                    </tr>
+                    
+                    <!-- Resultado -->
+                    <tr class="table-{% if resultado_operacional >= 0 %}success{% else %}danger{% endif %}">
+                        <th colspan="2">RESULTADO OPERACIONAL</th>
+                        <th class="text-end">${{ resultado_operacional|floatformat:0|intcomma }}</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

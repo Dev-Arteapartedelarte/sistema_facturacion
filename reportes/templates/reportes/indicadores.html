@@ -1,0 +1,162 @@
+<!-- reportes/templates/reportes/indicadores.html -->
+{% extends 'reportes/base_reporte.html' %}
+{% load humanize %}
+
+{% block titulo_reporte %}Indicadores Financieros{% endblock %}
+
+{% block contenido_reporte %}
+<div class="row g-4">
+    <!-- Liquidez -->
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Liquidez</h6>
+                <h2 class="{% if indicadores.liquidez >= 1 %}text-success{% else %}text-danger{% endif %}">
+                    {{ indicadores.liquidez|floatformat:2 }}
+                </h2>
+                <p class="small text-muted">
+                    Activo / Pasivo
+                    <br>
+                    {% if indicadores.liquidez >= 1 %}
+                    <span class="text-success">✓ Capacidad de pago adecuada</span>
+                    {% else %}
+                    <span class="text-danger">⚠️ Riesgo de liquidez</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Endeudamiento -->
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Endeudamiento</h6>
+                <h2 class="{% if indicadores.endeudamiento <= 0.5 %}text-success{% else %}text-warning{% endif %}">
+                    {{ indicadores.endeudamiento|floatformat:2 }}
+                </h2>
+                <p class="small text-muted">
+                    Pasivo / Activo
+                    <br>
+                    {% if indicadores.endeudamiento <= 0.5 %}
+                    <span class="text-success">✓ Endeudamiento bajo</span>
+                    {% elif indicadores.endeudamiento <= 0.7 %}
+                    <span class="text-warning">⚠️ Endeudamiento moderado</span>
+                    {% else %}
+                    <span class="text-danger">⚠️ Endeudamiento alto</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Rentabilidad -->
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Rentabilidad</h6>
+                <h2 class="{% if indicadores.rentabilidad >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    {{ indicadores.rentabilidad|floatformat:2 }}
+                </h2>
+                <p class="small text-muted">
+                    Resultado / Ingresos
+                    <br>
+                    {% if indicadores.rentabilidad >= 0 %}
+                    <span class="text-success">✓ Empresa rentable</span>
+                    {% else %}
+                    <span class="text-danger">⚠️ Empresa con pérdidas</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Margen -->
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Margen</h6>
+                <h2 class="{% if indicadores.margen >= 10 %}text-success{% else %}text-warning{% endif %}">
+                    {{ indicadores.margen|floatformat:1 }}%
+                </h2>
+                <p class="small text-muted">
+                    Resultado / Ingresos × 100
+                    <br>
+                    {% if indicadores.margen >= 10 %}
+                    <span class="text-success">✓ Margen saludable</span>
+                    {% elif indicadores.margen >= 5 %}
+                    <span class="text-warning">⚠️ Margen moderado</span>
+                    {% else %}
+                    <span class="text-danger">⚠️ Margen bajo</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resumen financiero -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clipboard-data"></i> Resumen Financiero</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Indicador</th>
+                                <th>Valor</th>
+                                <th>Interpretación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Total Ingresos</strong></td>
+                                <td class="text-end">${{ indicadores.total_ingresos|floatformat:0|intcomma }}</td>
+                                <td>Ingresos del período</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Gastos</strong></td>
+                                <td class="text-end">${{ indicadores.total_gastos|floatformat:0|intcomma }}</td>
+                                <td>Gastos del período</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Resultado</strong></td>
+                                <td class="text-end {% if indicadores.resultado >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                    ${{ indicadores.resultado|floatformat:0|intcomma }}
+                                </td>
+                                <td>{% if indicadores.resultado >= 0 %}Utilidad{% else %}Pérdida{% endif %}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Activo</strong></td>
+                                <td class="text-end">${{ indicadores.total_activo|floatformat:0|intcomma }}</td>
+                                <td>Recursos de la empresa</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total Pasivo</strong></td>
+                                <td class="text-end">${{ indicadores.total_pasivo|floatformat:0|intcomma }}</td>
+                                <td>Deudas de la empresa</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Patrimonio Neto</strong></td>
+                                <td class="text-end">${{ indicadores.patrimonio_neto|floatformat:0|intcomma }}</td>
+                                <td>Capital propio de la empresa</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12 text-muted small">
+        <p>Período analizado: {{ fecha_inicio|date:"d/m/Y" }} - {{ fecha_fin|date:"d/m/Y" }}</p>
+        <p>Empresa: {{ empresa.razon_social }}</p>
+    </div>
+</div>
+{% endblock %}

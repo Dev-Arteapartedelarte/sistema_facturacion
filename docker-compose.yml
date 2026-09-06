@@ -1,0 +1,55 @@
+services:
+  postgres:
+    container_name: postgres-container
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin  # Cambia esto en producción
+      PGDATA: /data/postgres
+    volumes:
+      - postgres-data:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - red-docker
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    container_name: pgadmin-container
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin  # Cambia esto en producción
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - red-docker
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+  redis:
+    container_name: redis-container
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - red-docker
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-}  # Opcional
+
+networks:
+  red-docker:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  pgadmin-data:

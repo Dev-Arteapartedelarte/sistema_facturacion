@@ -1,0 +1,189 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Sistema de Facturación{% endblock %}
+
+{% block content %}
+<div class="pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+    <small class="text-muted">Bienvenido, {{ user.username }}</small>
+</div>
+
+<!-- Estadísticas -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card card-stats primary">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted">Documentos</h6>
+                        <h3 class="mb-0">{{ total_documentos }}</h3>
+                    </div>
+                    <div class="text-primary">
+                        <i class="bi bi-file-text fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-stats success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted">Emitidos</h6>
+                        <h3 class="mb-0">{{ documentos_emitidos }}</h3>
+                    </div>
+                    <div class="text-success">
+                        <i class="bi bi-check-circle fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-stats warning">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted">Asientos</h6>
+                        <h3 class="mb-0">{{ total_asientos }}</h3>
+                    </div>
+                    <div class="text-warning">
+                        <i class="bi bi-journal fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-stats danger">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h6 class="text-muted">Empresa</h6>
+                        <h5 class="mb-0">{{ empresa.razon_social|truncatechars:20 }}</h5>
+                    </div>
+                    <div class="text-danger">
+                        <i class="bi bi-building fs-1"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Últimos Documentos -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-file-text"></i> Últimos Documentos</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>Tipo</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in ultimos_documentos %}
+                            <tr>
+                                <td>{{ doc.numero_documento }}</td>
+                                <td>{{ doc.get_tipo_documento_display|truncatechars:15 }}</td>
+                                <td>${{ doc.total|floatformat:0 }}</td>
+                                <td>
+                                    <span class="badge bg-{% if doc.estado == 'EMITIDO' %}success{% elif doc.estado == 'BORRADOR' %}warning{% else %}secondary{% endif %}">
+                                        {{ doc.get_estado_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No hay documentos</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Últimos Asientos -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-journal"></i> Últimos Asientos</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>N°</th>
+                                <th>Fecha</th>
+                                <th>Debe</th>
+                                <th>Haber</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for asiento in ultimos_asientos %}
+                            <tr>
+                                <td>{{ asiento.numero_asiento }}</td>
+                                <td>{{ asiento.fecha_asiento|date:"d/m/Y" }}</td>
+                                <td>${{ asiento.total_debe|floatformat:0 }}</td>
+                                <td>${{ asiento.total_haber|floatformat:0 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No hay asientos</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-link-45deg"></i> Accesos Rápidos</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <a href="/admin/core/documentotributario/add/" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-circle"></i> Nueva Factura
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/admin/core/documentotributario/" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-list-ul"></i> Ver Documentos
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/admin/core/asientocontable/" class="btn btn-outline-success w-100">
+                            <i class="bi bi-journal"></i> Ver Asientos
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'balance_general' %}" class="btn btn-outline-info w-100">
+                            <i class="bi bi-file-earmark-text"></i> Balance General
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+[project]
+name = "sistema-facturacion"
+version = "0.1.0"
+description = "Sistema de Facturación Electrónica para Chile con PostgreSQL y Django"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    {name = "Tu Nombre", email = "tu@email.com"}
+]
+dependencies = [
+    "django>=5.1",
+    "djangorestframework>=3.15",
+    "psycopg2-binary>=2.9",
+    "python-dotenv>=1.0",
+    "django-cors-headers>=4.4",
+    "celery>=5.4",
+    "redis>=5.0",
+    "lxml>=5.0",
+    "pyOpenSSL>=24.0",
+    "cryptography>=42.0",
+    "xmlsec>=1.3",
+    "djangorestframework-simplejwt>=5.3",
+    "django-csp>=4.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-django>=4.8",
+    "pytest-cov>=5.0",
+    "ruff>=0.6.0",
+    "mypy>=1.11.0",
+    "pre-commit>=3.6",
+    "django-stubs>=5.0",
+    "types-requests>=2.31",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "migrations",
+    "venv",
+    ".env",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # Pyflakes
+    "I",   # isort
+    "N",   # pep8-naming
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "SIM", # flake8-simplify
+]
+
+ignore = [
+    "E501",  # line too long
+    "E741",  # variable names
+    "B008",  # function calls in defaults
+    "B904",  # raise from None
+    "B905",  # zip without strict
+    "SIM108", # ternary operator
+    "SIM118", # key in dict
+    "D",     # docstring rules
+    "ANN",   # type annotations
+    "RUF012", # mutable class attributes
+    "PLC0415", # import inside function
+    "W291",  # trailing whitespace
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "D", "ANN"]
+"*/migrations/*" = ["D", "N", "B", "ANN"]
+"core/admin.py" = ["ANN", "D"]
+"*/serializers.py" = ["RUF012", "ANN"]
+"*/views.py" = ["ANN"]
+"*/models.py" = ["ANN", "D"]
+
+[tool.ruff.format]
+line-ending = "lf"
+indent-style = "space"
+quote-style = "double"
+skip-magic-trailing-comma = false
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+allow_untyped_defs = true
+allow_untyped_calls = true
+allow_any_generics = true
+warn_return_any = false
+warn_unused_configs = false
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py", "*_tests.py"]
+testpaths = ["core", "dte", "contabilidad", "reportes", "lce", "seguridad", "tests"]
+addopts = [
+    "--strict-markers",
+    "--tb=short",
+    "--cov=.",
+    "--cov-report=html",
+    "--cov-report=term",
+    "--cov-branch",
+]
+markers = [
+    "unit: Unit tests",
+    "integration: Integration tests",
+    "slow: Slow tests",
+    "django_db: Tests that use the database",
+]

@@ -1,0 +1,66 @@
+<!-- reportes/templates/reportes/base_reporte.html -->
+{% extends 'core/base.html' %}
+
+{% block title %}Reportes Financieros - Sistema de Facturación{% endblock %}
+
+{% block content %}
+<div class="pt-3 pb-2 mb-3 border-bottom">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h2">{% block titulo_reporte %}Reportes Financieros{% endblock %}</h1>
+            <small class="text-muted">{{ empresa.razon_social|default:"Sin empresa" }}</small>
+        </div>
+        <div>
+            <a href="{% url 'dashboard_reportes' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+</div>
+
+{% block contenido_reporte %}{% endblock %}
+
+<!-- Botones de exportación -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex gap-2">
+                    <button onclick="window.print()" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-printer"></i> Imprimir
+                    </button>
+                    <button onclick="exportarCSV()" class="btn btn-outline-success btn-sm">
+                        <i class="bi bi-file-earmark-spreadsheet"></i> Exportar CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function exportarCSV() {
+    const tabla = document.querySelector('table');
+    if (!tabla) return;
+    
+    let csv = [];
+    const filas = tabla.querySelectorAll('tr');
+    for (let fila of filas) {
+        let columna = [];
+        let celdas = fila.querySelectorAll('td, th');
+        for (let celda of celdas) {
+            columna.push('"' + celda.innerText.replace(/"/g, '""') + '"');
+        }
+        csv.push(columna.join(','));
+    }
+    
+    const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'reporte.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

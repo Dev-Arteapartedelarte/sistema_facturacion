@@ -1,0 +1,85 @@
+<!-- reportes/templates/reportes/dashboard_reportes.html -->
+{% extends 'reportes/base_reporte.html' %}
+
+{% block titulo_reporte %}Dashboard de Reportes{% endblock %}
+
+{% block contenido_reporte %}
+<div class="row g-4">
+    <!-- Tarjeta: Estado de Resultados -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-graph-up-arrow" style="font-size: 3rem; color: #198754;"></i>
+                <h5 class="card-title mt-3">Estado de Resultados</h5>
+                <p class="card-text text-muted">Ingresos, gastos y resultado del período.</p>
+                <a href="{% url 'estado_resultados' %}" class="btn btn-outline-success">
+                    Ver Reporte
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tarjeta: Balance General -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-pie-chart" style="font-size: 3rem; color: #0d6efd;"></i>
+                <h5 class="card-title mt-3">Balance General</h5>
+                <p class="card-text text-muted">Activos, pasivos y patrimonio de la empresa.</p>
+                <a href="{% url 'balance_general_reportes' %}" class="btn btn-outline-primary">
+                    Ver Reporte
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tarjeta: Indicadores -->
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-speedometer" style="font-size: 3rem; color: #ffc107;"></i>
+                <h5 class="card-title mt-3">Indicadores Financieros</h5>
+                <p class="card-text text-muted">Liquidez, endeudamiento y rentabilidad.</p>
+                <a href="{% url 'indicadores' %}" class="btn btn-outline-warning">
+                    Ver Indicadores
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Accesos Rápidos -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-link-45deg"></i> Accesos Rápidos</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <a href="{% url 'estado_resultados' %}?año={{ años|first }}&mes={{ meses|first }}" class="btn btn-outline-success w-100">
+                            <i class="bi bi-calendar"></i> Último mes
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'estado_resultados' %}?año={{ años|first }}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-calendar-year"></i> Último año
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'balance_general_reportes' %}" class="btn btn-outline-info w-100">
+                            <i class="bi bi-file-earmark-text"></i> Balance Actual
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="{% url 'indicadores' %}" class="btn btn-outline-warning w-100">
+                            <i class="bi bi-speedometer"></i> Indicadores
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
