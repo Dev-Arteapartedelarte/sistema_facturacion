@@ -1,0 +1,109 @@
+<!-- contabilidad/templates/contabilidad/lista_asientos.html -->
+{% extends 'core/base.html' %}
+{% load humanize %}
+
+{% block title %}Asientos Contables - Sistema de Facturación{% endblock %}
+
+{% block content %}
+<div class="pt-3 pb-2 mb-3 border-bottom">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h2"><i class="bi bi-journal-text"></i> Asientos Contables</h1>
+            <small class="text-muted">{{ empresa.razon_social|default:"Sin empresa" }}</small>
+        </div>
+        <div>
+            <a href="{% url 'lista_asientos' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-clockwise"></i> Actualizar
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+</div>
+{% endif %}
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtrar por Tipo de Asiento</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" action="{% url 'lista_asientos' %}" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label" for="tipo">Tipo de asiento</label>
+                <select name="tipo" id="tipo" class="form-select" onchange="this.form.submit()">
+                    <option value="">Todos los tipos</option>
+                    {% for valor, etiqueta in tipos_options %}
+                    <option value="{{ valor }}" {% if tipo_seleccionado == valor %}selected{% endif %}>
+                        {{ etiqueta }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-filter"></i> Filtrar
+                </button>
+                <a href="{% url 'lista_asientos' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x-circle"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if tipo_seleccionado %}
+<div class="alert alert-info py-2">
+    <i class="bi bi-tag"></i> Mostrando asientos de tipo
+    <strong>{{ tipo_seleccionado }}</strong>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-list"></i> Asientos de la empresa
+            <span class="badge bg-secondary ms-2">{{ asientos|length }}</span>
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>N°</th>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Libro</th>
+                        <th>Período</th>
+                        <th>Estado</th>
+                        <th class="text-end">Debe</th>
+                        <th class="text-end">Haber</th>
+                        <th>Glosa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asiento in asientos %}
+                    <tr>
+                        <td>{{ asiento.numero_asiento }}</td>
+                        <td>{{ asiento.fecha_asiento|date:"d/m/Y" }}</td>
+                        <td><span class="badge bg-secondary">{{ asiento.tipo_asiento }}</span></td>
+                        <td>{{ asiento.id_libro.nombre|default:"-" }}</td>
+                        <td>{{ asiento.id_periodo.año }}-{{ asiento.id_periodo.mes|stringformat:"02d" }}</td>
+                        <td><span class="badge bg-info badge-estado">{{ asiento.estado }}</span></td>
+                        <td class="text-end">${{ asiento.total_debe|intcomma }}</td>
+                        <td class="text-end">${{ asiento.total_haber|intcomma }}</td>
+                        <td>{{ asiento.glosa|truncatechars:60 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center text-muted">No hay asientos</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

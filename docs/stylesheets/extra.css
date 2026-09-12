@@ -1,0 +1,22 @@
+/* Estilos adicionales para la documentación */
+
+/* Resaltar el código de bloques de función de forma consistente */
+code {
+    font-size: 0.85em;
+}
+
+/* Sombra suave en las tarjetas de admonición */
+.admonition {
+    border-radius: 0.4rem;
+}
+
+/* Ajuste del tamaño de títulos en referencia API */
+h3.doc-heading code {
+    font-size: 1em;
+}
+
+/* Espaciado entre parámetros de las firmas autogeneradas */
+.doc-signature .highlight {
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.4rem;
+}

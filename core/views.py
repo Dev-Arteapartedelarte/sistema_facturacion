@@ -1,20 +1,34 @@
-from django.contrib.auth import logout
+# core/views.py
 from django.contrib.auth.decorators import login_required
 from django.db import connection
-from django.shortcuts import redirect, render
+from django.shortcuts import render
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .models import AsientoContable, DocumentoTributario, Empresa
+from .models import AsientoContable, DocumentoTributario
 
 
-@login_required(login_url="/admin/login/")
+class UserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        return Response(
+            {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+            }
+        )
+
+
+@login_required(login_url="login")
 def dashboard(request):
     """Dashboard principal del sistema"""
     empresa = getattr(request, "empresa_actual", None)
-
-    if not empresa:
-        empresa = Empresa.objects.first()
-        if empresa:
-            request.empresa_actual = empresa
 
     if not empresa:
         return render(
@@ -49,15 +63,10 @@ def dashboard(request):
     return render(request, "core/dashboard.html", context)
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def balance_general(request):
     """Vista del balance general"""
     empresa = getattr(request, "empresa_actual", None)
-
-    if not empresa:
-        empresa = Empresa.objects.first()
-        if empresa:
-            request.empresa_actual = empresa
 
     if not empresa:
         return render(
@@ -95,7 +104,11 @@ def balance_general(request):
     return render(request, "core/balance_general.html", context)
 
 
-def logout_view(request):
-    """Vista personalizada para cerrar sesión"""
-    logout(request)
-    return redirect("/admin/login/")
+def handler404(request, exception):
+    """Página 404 personalizada"""
+    return render(request, "core/404.html", status=404)
+
+
+def handler500(request):
+    """Página 500 personalizada"""
+    return render(request, "core/500.html", status=500)

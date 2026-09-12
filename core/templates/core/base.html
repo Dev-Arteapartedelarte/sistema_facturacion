@@ -79,8 +79,18 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="{% url 'lista_dte' %}">
+                                <i class="bi bi-receipt-cutoff"></i> Documentos DTE
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="/api/dte/documentos/">
                                 <i class="bi bi-code-square"></i> API DTE
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.resolver_match.url_name == 'lista_asientos' %}active{% endif %}" href="{% url 'lista_asientos' %}">
+                                <i class="bi bi-journal-text"></i> Asientos
                             </a>
                         </li>
                         <li class="nav-item">
@@ -96,7 +106,7 @@
                         </small>
                         <br>
                         <!-- Logout con POST -->
-                        <form action="{% url 'admin:logout' %}" method="post" style="display: inline;">
+                        <form action="{% url 'logout' %}" method="post" style="display: inline;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-link text-light small p-0 border-0" style="text-decoration: none;">
                                 <i class="bi bi-box-arrow-right"></i> Cerrar sesión

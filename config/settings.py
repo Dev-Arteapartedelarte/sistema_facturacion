@@ -1,4 +1,6 @@
+# config/settings.py
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -28,8 +30,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.humanize",  # ← AGREGAR para formateo de números
+    "django.contrib.humanize",
     "rest_framework",
+    "rest_framework_simplejwt",
     "corsheaders",
     "csp",
     "core",
@@ -60,6 +63,12 @@ MIDDLEWARE = [
 # ============================================================
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
+
+# ============================================================
+# AUTH
+# ============================================================
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "/"
 
 # ============================================================
 # TEMPLATES
@@ -128,7 +137,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ============================================================
-# CSRF (Cross-Site Request Forgery)
+# CSRF
 # ============================================================
 if DEBUG:
     CSRF_TRUSTED_ORIGINS = [
@@ -144,7 +153,7 @@ else:
     ]
 
 # ============================================================
-# CORS (Cross-Origin Resource Sharing)
+# CORS
 # ============================================================
 if DEBUG:
     CORS_ALLOWED_ORIGINS = [
@@ -176,7 +185,7 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
 
 # ============================================================
-# CONTENT SECURITY POLICY (CSP)
+# CSP
 # ============================================================
 if not DEBUG:
     CSP_DEFAULT_SRC = ("'self'",)
@@ -185,7 +194,7 @@ if not DEBUG:
     CSP_IMG_SRC = ("'self'", "data:")
 
 # ============================================================
-# REST FRAMEWORK - CON AUTENTICACIÓN BÁSICA HABILITADA
+# REST FRAMEWORK
 # ============================================================
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
@@ -195,8 +204,9 @@ REST_FRAMEWORK = {
         "rest_framework.parsers.JSONParser",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.BasicAuthentication",  # ← HABILITADO
+        "rest_framework.authentication.BasicAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
@@ -209,6 +219,24 @@ REST_FRAMEWORK = {
         "anon": "100/day",
         "user": "1000/day",
     },
+}
+
+# ============================================================
+# JWT
+# ============================================================
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": False,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
+    "VERIFYING_KEY": None,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "USER_ID_FIELD": "id",
+    "USER_ID_CLAIM": "user_id",
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "TOKEN_TYPE_CLAIM": "token_type",
 }
 
 # ============================================================
@@ -266,9 +294,3 @@ LOGGING = {
         },
     },
 }
-# ============================================================
-# LOGIN - Usar el admin de Django
-# ============================================================
-LOGIN_URL = "/admin/login/"
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/admin/login/"

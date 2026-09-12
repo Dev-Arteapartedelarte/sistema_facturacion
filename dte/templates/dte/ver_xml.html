@@ -1,0 +1,73 @@
+<!-- dte/templates/dte/ver_xml.html -->
+{% extends 'core/base.html' %}
+{% load humanize %}
+
+{% block title %}XML DTE - Sistema de Facturación{% endblock %}
+
+{% block content %}
+<div class="pt-3 pb-2 mb-3 border-bottom">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h2"><i class="bi bi-file-code"></i> XML del Documento
+                {% if documento %}#{{ documento.numero_documento }}{% endif %}
+            </h1>
+            <small class="text-muted">
+                {{ empresa.razon_social|default:"Sin empresa" }}
+                {% if documento %} · {{ documento.tipo_documento }} · Folio {{ documento.folio|default:"-" }}
+                · {{ documento.fecha_emision|date:"d/m/Y" }} · {{ documento.estado }}{% endif %}
+            </small>
+        </div>
+        <div>
+            <a href="{% url 'lista_dte' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Volver al listado
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+</div>
+{% endif %}
+
+{% if xml_content %}
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between">
+            <span><i class="bi bi-file-xml"></i> XML del DTE</span>
+            <div>
+                <button onclick="copyXML()" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-copy"></i> Copiar
+                </button>
+                <button onclick="downloadXML()" class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-download"></i> Descargar
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <pre id="xml-content" style="background: #f8f9fa; padding: 20px; margin: 0; overflow: auto; max-height: 600px; font-size: 12px;"><code>{{ xml_content|escape }}</code></pre>
+    </div>
+</div>
+
+<script>
+function copyXML() {
+    const content = document.getElementById('xml-content');
+    navigator.clipboard.writeText(content.textContent);
+    alert('XML copiado al portapapeles');
+}
+
+function downloadXML() {
+    const content = document.getElementById('xml-content');
+    const blob = new Blob([content.textContent], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'dte_{{ documento.tipo_documento }}_{{ documento.folio|default:documento.numero_documento }}.xml';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+</script>
+{% endif %}
+{% endblock %}

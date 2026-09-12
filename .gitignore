@@ -37,6 +37,9 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 
+# Documentation (MkDocs output)
+site/
+
 # Celery
 celerybeat-schedule
 celerybeat.pid

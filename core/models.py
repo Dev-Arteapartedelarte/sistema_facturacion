@@ -314,7 +314,11 @@ class DocumentoTraslado(models.Model):
     """Documento Traslado - Tabla: contabilidad.documento_traslado"""
 
     id_documento = models.OneToOneField(
-        DocumentoTributario, on_delete=models.CASCADE, db_column="id_documento", primary_key=True
+        DocumentoTributario,
+        on_delete=models.CASCADE,
+        db_column="id_documento",
+        primary_key=True,
+        related_name="traslado",
     )
     tipo_despacho = models.SmallIntegerField(blank=True, null=True)
     ind_traslado = models.SmallIntegerField(blank=True, null=True)

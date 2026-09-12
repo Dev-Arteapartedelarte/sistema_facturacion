@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # ============================================================
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def api_test(request):
     """Endpoint de prueba para verificar que la API funciona"""
     empresa = getattr(request, "empresa_actual", None)
@@ -38,7 +38,7 @@ def api_test(request):
 # ============================================================
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def dashboard_reportes(request):
     """Dashboard de reportes financieros"""
     empresa = getattr(request, "empresa_actual", None)
@@ -89,7 +89,7 @@ def dashboard_reportes(request):
     return render(request, "reportes/dashboard_reportes.html", context)
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def estado_resultados(request):
     """Vista del Estado de Resultados (Pérdidas y Ganancias)"""
     empresa = getattr(request, "empresa_actual", None)
@@ -209,7 +209,7 @@ def estado_resultados(request):
     return render(request, "reportes/estado_resultados.html", context)
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def balance_general_view(request):
     """Vista del Balance General"""
     empresa = getattr(request, "empresa_actual", None)
@@ -270,7 +270,7 @@ def balance_general_view(request):
     return render(request, "reportes/balance_general.html", context)
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def indicadores_financieros(request):
     """Vista de indicadores financieros"""
     empresa = getattr(request, "empresa_actual", None)
@@ -359,7 +359,7 @@ def indicadores_financieros(request):
 # ============================================================
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def api_estado_resultados(request):
     """API para Estado de Resultados en JSON"""
     logger.info(f"API Estado Resultados - Usuario: {request.user.username}")
@@ -436,7 +436,7 @@ def api_estado_resultados(request):
         return JsonResponse({"success": False, "error": str(e)}, status=500)
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def api_balance_general(request):
     """API para Balance General en JSON"""
     logger.info(f"API Balance General - Usuario: {request.user.username}")

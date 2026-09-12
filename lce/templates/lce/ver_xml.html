@@ -1,0 +1,116 @@
+<!-- lce/templates/lce/ver_xml.html -->
+{% extends 'core/base.html' %}
+{% load humanize %}
+
+{% block title %}Visualizar XML - Sistema de Facturación{% endblock %}
+
+{% block content %}
+<div class="pt-3 pb-2 mb-3 border-bottom">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h2"><i class="bi bi-file-code"></i> Visualizar XML: {{ tipo_label }}</h1>
+            <small class="text-muted">
+                {{ empresa.razon_social|default:"Sin empresa" }}
+                {% if año and mes %} · Período: {{ año }}-{{ mes|stringformat:"02d" }}{% endif %}
+            </small>
+        </div>
+        <div>
+            <a href="{% url 'dashboard_lce' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+</div>
+{% endif %}
+
+<!-- Formulario de selección -->
+{% if tipo %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-funnel"></i> Seleccionar Período</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" action="{% url 'ver_xml_libro' tipo %}" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Año</label>
+                <select name="año" class="form-select" required>
+                    <option value="">Seleccionar</option>
+                    {% for periodo in periodos %}
+                    <option value="{{ periodo.0 }}" {% if año == periodo.0|stringformat:"i" %}selected{% endif %}>
+                        {{ periodo.0 }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if necesita_mes %}
+            <div class="col-md-3">
+                <label class="form-label">Mes</label>
+                <select name="mes" class="form-select" required>
+                    <option value="">Seleccionar</option>
+                    {% for periodo in periodos %}
+                    <option value="{{ periodo.1 }}" {% if mes == periodo.1|stringformat:"i" %}selected{% endif %}>
+                        {{ periodo.1 }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-eye"></i> Ver XML
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% if xml_content %}
+<div class="card">
+    <div class="card-header">
+        <div class="d-flex justify-content-between">
+            <span><i class="bi bi-file-code"></i> {{ tipo_label }}</span>
+            <div>
+                <button onclick="copyXML()" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-copy"></i> Copiar
+                </button>
+                <button onclick="downloadXML()" class="btn btn-outline-success btn-sm">
+                    <i class="bi bi-download"></i> Descargar
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <pre id="xml-content" style="background: #f8f9fa; padding: 20px; margin: 0; overflow: auto; max-height: 600px; font-size: 12px;"><code>{{ xml_content|escape }}</code></pre>
+    </div>
+</div>
+
+<script>
+function copyXML() {
+    const content = document.getElementById('xml-content');
+    navigator.clipboard.writeText(content.textContent);
+    alert('XML copiado al portapapeles');
+}
+
+function downloadXML() {
+    const content = document.getElementById('xml-content');
+    const blob = new Blob([content.textContent], { type: 'application/xml' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '{{ tipo }}_{% if año %}{{ año }}{% if mes %}_{{ mes|stringformat:"02d" }}{% endif %}{% endif %}.xml';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+</script>
+{% elif not error %}
+    <p class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Selecciona un período para visualizar el {{ tipo_label|default:"libro" }}.
+    </p>
+    {% endif %}
+{% endblock %}

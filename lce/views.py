@@ -1,5 +1,5 @@
 # lce/views.py
-import traceback
+import logging
 from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
@@ -9,12 +9,16 @@ from django.shortcuts import render
 
 from core.models import Empresa
 
+from .services import LCEService
+
+logger = logging.getLogger(__name__)
+
 # ============================================================
-# VISTAS HTML
+# VISTAS CON AUTENTICACIÓN BÁSICA
 # ============================================================
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def dashboard_lce(request):
     """Dashboard de Libros Contables Electrónicos"""
     empresa = getattr(request, "empresa_actual", None)
@@ -53,9 +57,11 @@ def dashboard_lce(request):
     )
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def generar_libro_diario(request):
     """Generar y descargar XML del Libro Diario"""
+    logger.info("=== generar_libro_diario iniciado ===")
+
     empresa = getattr(request, "empresa_actual", None)
     if not empresa:
         empresa = Empresa.objects.first()
@@ -63,6 +69,7 @@ def generar_libro_diario(request):
             request.empresa_actual = empresa
 
     if not empresa:
+        logger.error("No hay empresa asignada")
         return JsonResponse({"error": "No hay empresa asignada"}, status=400)
 
     año = request.GET.get("año")
@@ -97,10 +104,11 @@ def generar_libro_diario(request):
         return response
 
     except Exception as e:
-        return JsonResponse({"error": str(e), "traceback": traceback.format_exc()}, status=500)
+        logger.error(f"Error: {str(e)}")
+        return JsonResponse({"error": str(e)}, status=500)
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def generar_libro_mayor(request):
     """Generar y descargar XML del Libro Mayor"""
     empresa = getattr(request, "empresa_actual", None)
@@ -144,10 +152,10 @@ def generar_libro_mayor(request):
         return response
 
     except Exception as e:
-        return JsonResponse({"error": str(e), "traceback": traceback.format_exc()}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def generar_diccionario_cuentas(request):
     """Generar y descargar XML del Diccionario de Cuentas"""
     empresa = getattr(request, "empresa_actual", None)
@@ -188,10 +196,10 @@ def generar_diccionario_cuentas(request):
         return response
 
     except Exception as e:
-        return JsonResponse({"error": str(e), "traceback": traceback.format_exc()}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def previsualizar_libro_diario(request):
     """Previsualizar el Libro Diario en HTML"""
     empresa = getattr(request, "empresa_actual", None)
@@ -311,12 +319,96 @@ def previsualizar_libro_diario(request):
         )
 
 
+@login_required(login_url="login")
+def ver_xml_libro(request, tipo):
+    """Visualizar en el navegador el XML de un libro (diario, mayor o diccionario)."""
+    tipos = {
+        "diario": {"label": "Libro Diario", "func": LCEService.generar_xml_libro_diario, "necesita_mes": True},
+        "mayor": {"label": "Libro Mayor", "func": LCEService.generar_xml_libro_mayor, "necesita_mes": True},
+        "diccionario": {
+            "label": "Diccionario de Cuentas",
+            "func": LCEService.generar_xml_diccionario_cuentas,
+            "necesita_mes": False,
+        },
+    }
+
+    empresa = getattr(request, "empresa_actual", None)
+    if not empresa:
+        empresa = Empresa.objects.first()
+        if empresa:
+            request.empresa_actual = empresa
+
+    if not empresa:
+        return render(request, "lce/ver_xml.html", {"error": "No hay empresa asignada"})
+
+    if tipo not in tipos:
+        return render(request, "lce/ver_xml.html", {"error": "Tipo de libro no válido"})
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT DISTINCT
+                EXTRACT(YEAR FROM fecha_asiento)::INT as año,
+                EXTRACT(MONTH FROM fecha_asiento)::INT as mes
+            FROM asiento_contable
+            WHERE id_empresa = %s
+              AND estado IN ('CONTABILIZADO', 'CERRADO')
+            ORDER BY año DESC, mes DESC
+        """,
+            [str(empresa.id_empresa)],
+        )
+        periodos = cursor.fetchall()
+
+    año = request.GET.get("año")
+    mes = request.GET.get("mes")
+    xml_content = None
+    error = None
+
+    if año:
+        try:
+            año_int = int(año)
+        except ValueError:
+            error = "Año debe ser un número"
+        else:
+            try:
+                if tipo == "diccionario":
+                    xml_content = LCEService.generar_xml_diccionario_cuentas(empresa.id_empresa, año_int)
+                elif mes:
+                    mes_int = int(mes)
+                    func = tipos[tipo]["func"]
+                    xml_content = func(empresa.id_empresa, año_int, mes_int)
+                else:
+                    error = "Se requiere año y mes"
+            except ValueError:
+                error = "Mes debe ser un número"
+            except Exception as e:
+                error = str(e)
+        if error is None and not xml_content:
+            error = "No se pudo generar el XML. Verifique que hay datos para el período."
+
+    return render(
+        request,
+        "lce/ver_xml.html",
+        {
+            "empresa": empresa,
+            "periodos": periodos,
+            "tipo": tipo,
+            "tipo_label": tipos[tipo]["label"],
+            "necesita_mes": tipos[tipo]["necesita_mes"],
+            "año": año,
+            "mes": mes,
+            "xml_content": xml_content,
+            "error": error,
+        },
+    )
+
+
 # ============================================================
 # API ENDPOINTS
 # ============================================================
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def api_periodos(request):
     """API para obtener períodos disponibles"""
     empresa = getattr(request, "empresa_actual", None)
@@ -348,7 +440,7 @@ def api_periodos(request):
     return JsonResponse({"periodos": data})
 
 
-@login_required(login_url="/admin/login/")
+@login_required(login_url="login")
 def api_cal(request):
     """API para obtener CAL disponibles"""
     empresa = getattr(request, "empresa_actual", None)

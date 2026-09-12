@@ -1,4 +1,4 @@
-.PHONY: help install dev migrate test shell superuser format lint type-check check run clean
+.PHONY: help install dev migrate test shell superuser format lint type-check check docs-serve docs-build run clean
 
 help:
 	@echo "Comandos disponibles:"
@@ -13,6 +13,8 @@ help:
 	@echo "  lint           Lint con Ruff"
 	@echo "  type-check     Type checking con mypy"
 	@echo "  check          Ejecutar todos los quality gates"
+	@echo "  docs-serve     Servir documentación local en http://127.0.0.1:8000"
+	@echo "  docs-build     Generar sitio estático de documentación en site/"
 	@echo "  run            Ejecutar servidor de desarrollo"
 	@echo "  clean          Limpiar archivos temporales"
 
@@ -64,6 +66,12 @@ check:
 
 run:
 	uv run python manage.py runserver
+
+docs-serve:
+	uv run mkdocs serve
+
+docs-build:
+	uv run mkdocs build
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true

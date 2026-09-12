@@ -3,7 +3,17 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.utils.html import format_html
 
-from .models import DocumentoDetalle, DocumentoTributario, Empresa, Entidad, Perfil, PlanCuentas, Producto
+from .models import (
+    AsientoContable,
+    AsientoDetalle,
+    DocumentoDetalle,
+    DocumentoTributario,
+    Empresa,
+    Entidad,
+    Perfil,
+    PlanCuentas,
+    Producto,
+)
 
 
 # ============================================================
@@ -138,3 +148,38 @@ class DocumentoDetalleAdmin(admin.ModelAdmin):
     list_display = ["id_documento", "numero_linea", "descripcion", "cantidad", "monto_neto", "monto_total"]
     list_filter = ["id_documento__tipo_documento"]
     search_fields = ["descripcion"]
+
+
+# ============================================================
+# Admin para AsientoContable
+# ============================================================
+@admin.register(AsientoContable)
+class AsientoContableAdmin(admin.ModelAdmin):
+    list_display = [
+        "id_asiento",
+        "numero_asiento",
+        "fecha_asiento",
+        "tipo_asiento",
+        "estado",
+        "total_debe",
+        "total_haber",
+        "empresa_nombre",
+    ]
+    list_filter = ["tipo_asiento", "estado", "fecha_asiento", "id_empresa"]
+    search_fields = ["numero_asiento", "glosa", "id_empresa__razon_social"]
+    date_hierarchy = "fecha_asiento"
+
+    def empresa_nombre(self, obj):
+        return obj.id_empresa.razon_social if obj.id_empresa else "-"
+
+    empresa_nombre.short_description = "Empresa"
+
+
+# ============================================================
+# Admin para AsientoDetalle
+# ============================================================
+@admin.register(AsientoDetalle)
+class AsientoDetalleAdmin(admin.ModelAdmin):
+    list_display = ["id_asiento", "numero_linea", "id_cuenta", "tipo_movimiento", "monto"]
+    list_filter = ["id_asiento__tipo_asiento", "id_cuenta__codigo_cuenta", "tipo_movimiento"]
+    search_fields = ["id_asiento__numero_asiento", "id_cuenta__codigo_cuenta", "glosa"]

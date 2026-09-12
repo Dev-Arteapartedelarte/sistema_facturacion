@@ -1,0 +1,112 @@
+<!-- dte/templates/dte/lista_dte.html -->
+{% extends 'core/base.html' %}
+{% load humanize %}
+
+{% block title %}Documentos Tributarios - Sistema de Facturación{% endblock %}
+
+{% block content %}
+<div class="pt-3 pb-2 mb-3 border-bottom">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h2"><i class="bi bi-receipt"></i> Documentos Tributarios</h1>
+            <small class="text-muted">{{ empresa.razon_social|default:"Sin empresa" }}</small>
+        </div>
+        <div>
+            <a href="{% url 'lista_dte' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-clockwise"></i> Actualizar
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if error %}
+<div class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+</div>
+{% endif %}
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtrar por Cliente</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" action="{% url 'lista_dte' %}" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label" for="cliente">Cliente</label>
+                <select name="cliente" id="cliente" class="form-select" onchange="this.form.submit()">
+                    <option value="">Todos los clientes</option>
+                    {% for c in clientes %}
+                    <option value="{{ c.id_entidad }}"
+                            {% if cliente_seleccionado and cliente_seleccionado.id_entidad == c.id_entidad %}selected{% endif %}>
+                        {{ c.razon_social }} ({{ c.rut }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-filter"></i> Filtrar
+                </button>
+                <a href="{% url 'lista_dte' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x-circle"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if cliente_seleccionado %}
+<div class="alert alert-info py-2">
+    <i class="bi bi-person-check"></i> Mostrando documentos de
+    <strong>{{ cliente_seleccionado.razon_social }}</strong> ({{ cliente_seleccionado.rut }})
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-list"></i> Documentos de la empresa
+            <span class="badge bg-secondary ms-2">{{ documentos|length }}</span>
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Tipo</th>
+                        <th>Folio</th>
+                        <th>Emisión</th>
+                        <th>Entidad</th>
+                        <th class="text-end">Total</th>
+                        <th>Estado</th>
+                        <th>XML</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documentos %}
+                    <tr>
+                        <td>{{ doc.numero_documento }}</td>
+                        <td><span class="badge bg-secondary">{{ doc.tipo_documento }}</span></td>
+                        <td>{{ doc.folio|default:"-" }}</td>
+                        <td>{{ doc.fecha_emision|date:"d/m/Y" }}</td>
+                        <td>{{ doc.id_entidad }}</td>
+                        <td class="text-end">${{ doc.total|intcomma }}</td>
+                        <td><span class="badge bg-info badge-estado">{{ doc.estado }}</span></td>
+                        <td>
+                            <a href="{% url 'ver_xml_dte' doc.id_documento %}" class="btn btn-outline-success btn-sm">
+                                <i class="bi bi-file-code"></i> Ver XML
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted">No hay documentos</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

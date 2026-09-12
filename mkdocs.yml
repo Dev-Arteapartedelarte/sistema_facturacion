@@ -1,0 +1,111 @@
+site_name: Sistema de Facturación Electrónica
+site_description: Documentación de desarrollo del Sistema de Facturación Electrónica
+site_dir: site/
+
+theme:
+  name: material
+  language: es
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Cambiar a modo oscuro
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: light-blue
+      toggle:
+        icon: material/weather-sunny
+        name: Cambiar a modo claro
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - toc.follow
+    - content.code.copy
+
+extra_css:
+  - stylesheets/extra.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [.]
+          options:
+            show_source: true
+            show_root_heading: true
+            show_root_toc_entry: true
+            show_category_heading: true
+            heading_level: 3
+            docstring_style: google
+            members_order: source
+            separate_signature: true
+            show_signature_annotations: true
+
+nav:
+  - Inicio: index.md
+  - Arquitectura: arquitectura.md
+  - config:
+      - Módulo config: config/index.md
+  - core:
+      - Módulo core: core/index.md
+      - Modelos: core/models.md
+      - Middleware: core/middleware.md
+      - Vistas: core/views.md
+      - Consultas a funciones almacenadas: core/db_helpers.md
+      - Admin: core/admin.md
+      - Referencia API: core/api_reference.md
+  - dte (Documentos Tributarios Electrónicos):
+      - Módulo dte: dte/index.md
+      - Servicios: dte/services.md
+      - Serializers: dte/serializers.md
+      - Vistas: dte/views.md
+      - Permisos: dte/permissions.md
+      - Referencia API: dte/api_reference.md
+  - contabilidad:
+      - Módulo contabilidad: contabilidad/index.md
+      - Vistas: contabilidad/views.md
+      - Serializers: contabilidad/serializers.md
+      - Permisos: contabilidad/permissions.md
+      - Referencia API: contabilidad/api_reference.md
+  - lce (Libros Contables Electrónicos):
+      - Módulo lce: lce/index.md
+      - Servicios: lce/services.md
+      - Firma digital: lce/signer.md
+      - Vistas: lce/views.md
+      - Referencia API: lce/api_reference.md
+  - reportes:
+      - Módulo reportes: reportes/index.md
+      - Vistas: reportes/views.md
+      - Referencia API: reportes/api_reference.md
+  - seguridad:
+      - Módulo seguridad: seguridad/index.md
+  - xsd_validator:
+      - Validación XSD: xsd_validator/index.md
